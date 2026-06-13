@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 venv/
 .env
-data/processed_news.csv
-data/*.csv
-data/*.zip
+
+*.pkl
+data/
+model/

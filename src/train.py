@@ -1,26 +1,30 @@
-import pandas as pd
-import re
-from nltk.corpus import stopwords
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split
+import pandas
+df = pandas.read_csv("data/processed_news.csv")
 
-df = pd.read_csv("fake-news-detection\data\processed_news.csv")
-
-df["content"] = df["content"].str.lower()
-
-df["content"] = df["content"].apply(
-    lambda x: re.sub(r'[^a-zA-Z\s]', '', x)
-)
-
-stop_words = set(stopwords.words('english'))
-df["content"] = df["content"].apply(
-    lambda x: " ".join([word for word in x.split() if word not in stop_words])
-)
-
+from sklearn.feature_extraction.text import TfidfVectorizer 
 vectorizer = TfidfVectorizer(max_features=5000)
 X = vectorizer.fit_transform(df["content"]).toarray()
 y = df["label"]
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2, random_state=42)
+
+from sklearn.linear_model import LogisticRegression
+model = LogisticRegression()
+model.fit(X_train,y_train)
+y_pred = model.predict(X_test)
+
+from sklearn.metrics import accuracy_score
+accuracy = accuracy_score(y_test, y_pred)
+print("Accuracy: ",accuracy)
+
+# from sklearn.metrics import confusion_matrix
+# print(confusion_matrix(y_test, y_pred))
+
+# from sklearn.metrics import classification_report
+# print(classification_report(y_test, y_pred))
+
+import pickle
+pickle.dump(model, open("model/fake_news_model.pkl","wb"))
+pickle.dump(vectorizer, open("model/vectorizer.pkl","wb"))
